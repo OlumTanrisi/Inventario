@@ -25,10 +25,10 @@ class Inventory:
     def create_connection(self):
         try:
             self.conn = mysql.connector.connect(
-                host='example: localhost',
-                user='example: root',
+                host='host',
+                user='user',
                 password='password',
-                database='name: database'
+                database='name'
             )
             if self.conn.is_connected():
                 self.cursor = self.conn.cursor()
@@ -51,7 +51,21 @@ class Inventory:
         self.cursor.execute(query)
         self.conn.commit()
 
+    def get_next_id(self):
+        query = "SELECT id FROM inventory ORDER BY id DESC LIMIT 1"
+        self.cursor.execute(query)
+        result = self.cursor.fetchone()
+        if result:
+            last_id = result[0]
+            prefix, num = last_id.split('-')
+            next_num = int(num) + 1
+            next_id = f"{prefix}-{next_num:05d}"
+        else:
+            next_id = "EQP-00001"
+        return next_id
+
     def add_product(self, product):
+        product.id = self.get_next_id()
         query = "INSERT INTO inventory (id, date, department, type, model, value_unit, with_user) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         self.cursor.execute(query, (product.id, product.date, product.department, product.type, product.model, product.value_unit, product.with_user))
         self.conn.commit()
@@ -74,8 +88,8 @@ class Inventory:
             print("No products in the inventory")
 
     def update_product(self, product):
-        query = "UPDATE inventory SET date = %s, department = %s, type = %s, model = %s, value_unit = %s, with_user = %s WHERE id = %s"
-        self.cursor.execute(query, (product.date, product.department, product.type, product.model, product.value_unit, product.with_user, product.id))
+        query = "UPDATE inventory SET date = %s, department = %s, with_user = %s WHERE id = %s"
+        self.cursor.execute(query, (product.date, product.department, product.with_user, product.id))
         self.conn.commit()
 
     def search_product(self, id):
@@ -106,7 +120,6 @@ while True:
     choice = int(input("Enter your choice: "))
     
     if choice == 1:
-        id = input("Enter product ID: ")
         date = input("Enter product date (YYYY-MM-DD): ")
         department = input("Enter product department: ")
         type = input("Enter product type: ")
@@ -114,49 +127,46 @@ while True:
         value_unit = input("Enter product value unit: ")
         with_user = input("Enter product with user: ")
         
-        new_product = Product(id, date, department, type, model, value_unit, with_user)
+        new_product = Product(None, date, department, type, model, value_unit, with_user)
 
-        print("{} is being added".format(id))
+        print("Adding product...")
         time.sleep(2)
         inventory.add_product(new_product)
-        print("{} is added".format(id))
+        print("Product added with ID:", new_product.id)
 
     elif choice == 2:
         id = input("Enter product ID: ")
 
-        print("{} is being removed\n".format(id))
+        print("Removing product...")
         time.sleep(2)
         inventory.remove_product(id)
-        print("{} is removed\n".format(id))
+        print("Product removed")
 
     elif choice == 3:
         print("Listing products...")
         time.sleep(2)
         inventory.list_products()
-        print("Products are listed")
+        print("Products listed")
 
     elif choice == 4:
         id = input("Enter product ID to update: ")
         date = input("Enter product date to update (YYYY-MM-DD): ")
         department = input("Enter product department to update: ")
-        type = input("Enter product type to update: ")
-        model = input("Enter product model to update: ")
-        value_unit = input("Enter product value unit to update: ")
         with_user = input("Enter product with user to update: ")
 
-        updated_product = Product(id, date, department, type, model, value_unit, with_user)
+        updated_product = Product(id, date, department, None, None, None, with_user)
 
-        print("{} is being updated\n".format(id))
+        print("Updating product...")
         time.sleep(2)
         inventory.update_product(updated_product)
-        print("{} is updated\n".format(id))
+        print("Product updated")
 
     elif choice == 5:
         id = input("Enter product ID for searching: ") 
-        print("{} is being searched\n".format(id))
+        print("Searching product...")
         time.sleep(2)
         inventory.search_product(id)
-        print("{} is listed\n".format(id))
+        print("Product search completed")
 
     elif choice == 6:
         break
