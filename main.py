@@ -3,18 +3,18 @@ from mysql.connector import Error
 import time
 
 class Product:
-    def __init__(self, id, date, department, type, model, value_unit, quantity):
+    def __init__(self, id, date, department, type, model, value_unit, with_user):
         self.id = id
         self.date = date
         self.department = department
         self.type = type
         self.model = model
-        self.value_unit = unit
-        self.quantity = quantity
+        self.value_unit = value_unit
+        self.with_user = with_user
 
     def __str__(self):
-        return "Product ID:{}\nDate: {}\nDepartment: {}\nType: {}\nModel: {}\nUnit: {}\nQuantity: {}".format(
-            self.id, self.date, self.department, self.type, self.model, self.value_unit, self.quantity
+        return "Product ID:{}\nDate: {}\nDepartment: {}\nType: {}\nModel: {}\nValue_Unit: {}\nWith User: {}".format(
+            self.id, self.date, self.department, self.type, self.model, self.value_unit, self.with_user
         )
 
 class Inventory:
@@ -25,10 +25,10 @@ class Inventory:
     def create_connection(self):
         try:
             self.conn = mysql.connector.connect(
-                host='exmplo: localhost',
-                user='exemplo: root',
-                password='sua senha',
-                database='nome da database'
+                host='example: localhost',
+                user='example: root',
+                password='password',
+                database='name: database'
             )
             if self.conn.is_connected():
                 self.cursor = self.conn.cursor()
@@ -45,15 +45,15 @@ class Inventory:
             type VARCHAR(255) NOT NULL,
             model VARCHAR(255) NOT NULL,
             value_unit VARCHAR(255) NOT NULL,
-            quantity INT NOT NULL
+            with_user VARCHAR(255) NOT NULL
         );
         """
         self.cursor.execute(query)
         self.conn.commit()
 
     def add_product(self, product):
-        query = "INSERT INTO inventory (id, date, department, type, model, value_unit, quantity) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        self.cursor.execute(query, (product.id, product.date, product.department, product.type, product.model, product.value_unit, product.quantity))
+        query = "INSERT INTO inventory (id, date, department, type, model, value_unit, with_user) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        self.cursor.execute(query, (product.id, product.date, product.department, product.type, product.model, product.value_unit, product.with_user))
         self.conn.commit()
 
     def remove_product(self, id):
@@ -67,15 +67,15 @@ class Inventory:
         rows = self.cursor.fetchall()
         if rows:
             for row in rows:
-                print("Product ID: {}\nProduct Date: {}\nProduct Department: {}\nProduct Type: {}\nProduct Model: {}\nProduct Value Unit: {}\nProduct Quantity: {}\n ".format(
+                print("Product ID: {}\nProduct Date: {}\nProduct Department: {}\nProduct Type: {}\nProduct Model: {}\nProduct Value Unit: {}\nProduct With User: {}\n ".format(
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6]
                 ))
         else:
             print("No products in the inventory")
 
     def update_product(self, product):
-        query = "UPDATE inventory SET date = %s, department = %s, type = %s, model = %s, unit = %s, quantity = %s WHERE id = %s"
-        self.cursor.execute(query, (product.date, product.department, product.type, product.model, product.value_unit, product.quantity, product.id))
+        query = "UPDATE inventory SET date = %s, department = %s, type = %s, model = %s, value_unit = %s, with_user = %s WHERE id = %s"
+        self.cursor.execute(query, (product.date, product.department, product.type, product.model, product.value_unit, product.with_user, product.id))
         self.conn.commit()
 
     def search_product(self, id):
@@ -84,7 +84,7 @@ class Inventory:
         rows = self.cursor.fetchall()
         if rows:
             for row in rows:
-                print("Product ID: {}\nProduct Date: {}\nProduct Department: {}\nProduct Type: {}\nProduct Model: {}\nProduct Value Unit: {}\nProduct Quantity: {}\n ".format(
+                print("Product ID: {}\nProduct Date: {}\nProduct Department: {}\nProduct Type: {}\nProduct Model: {}\nProduct Unit: {}\nProduct With User: {}\n ".format(
                     row[0], row[1], row[2], row[3], row[4], row[5], row[6]
                 ))
         else:
@@ -111,9 +111,10 @@ while True:
         department = input("Enter product department: ")
         type = input("Enter product type: ")
         model = input("Enter product model: ")
-        value_unit = input("Enter product Value Unit: ")
-        quantity = int(input("Enter product quantity: "))
-        new_product = Product(id, date, department, type, model, value_unit, quantity)
+        value_unit = input("Enter product value unit: ")
+        with_user = input("Enter product with user: ")
+        
+        new_product = Product(id, date, department, type, model, value_unit, with_user)
 
         print("{} is being added".format(id))
         time.sleep(2)
@@ -140,9 +141,10 @@ while True:
         department = input("Enter product department to update: ")
         type = input("Enter product type to update: ")
         model = input("Enter product model to update: ")
-        value_unit = input("Enter product Value Unit to update: ")
-        quantity = int(input("Enter product quantity to update: "))
-        updated_product = Product(id, date, department, type, model, value_unit, quantity)
+        value_unit = input("Enter product value unit to update: ")
+        with_user = input("Enter product with user to update: ")
+
+        updated_product = Product(id, date, department, type, model, value_unit, with_user)
 
         print("{} is being updated\n".format(id))
         time.sleep(2)
@@ -161,4 +163,3 @@ while True:
 
     else:
         print("Invalid choice")
-
